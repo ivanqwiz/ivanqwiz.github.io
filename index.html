@@ -1,163 +1,125 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VPN VLESS Generator</title>
+    <title>VPN Account Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        [x-cloak] { display: none !important; }
-    </style>
 </head>
-<body class="bg-slate-950 text-slate-200 min-h-screen flex items-center justify-center p-4 font-sans">
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
 
-    <div x-data="vpnApp()" class="max-w-md w-full bg-slate-900 rounded-3xl shadow-2xl p-6 md:p-8 border border-slate-800 transition-all">
-        
-        <div class="text-center mb-8">
-            <div class="inline-block p-3 bg-blue-600/10 rounded-2xl mb-4">
-                <i class="fas fa-bolt text-4xl text-yellow-400"></i>
-            </div>
-            <h1 class="text-2xl font-bold text-white tracking-tight">VLESS GENERATOR</h1>
-            <p class="text-slate-400 text-sm mt-1">Gunakan link di bawah untuk aplikasi V2Ray/NekoBox</p>
-        </div>
-
-        <div class="space-y-6">
-            
-            <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">1. Pilih Lokasi Server</label>
-                <div class="grid grid-cols-1 gap-2">
-                    <template x-for="server in servers" :key="server.id">
-                        <button @click="selectedServer = server" 
-                            :class="selectedServer.name === server.name ? 'border-blue-500 bg-blue-500/10 ring-1 ring-blue-500' : 'border-slate-800 bg-slate-800/50 hover:border-slate-700'"
-                            class="flex items-center p-4 border-2 rounded-2xl transition-all group text-left">
-                            <span class="text-2xl mr-4" x-text="server.flag"></span>
-                            <div>
-                                <span class="block font-medium text-slate-200" x-text="server.name"></span>
-                                <span class="text-[10px] text-slate-500" x-text="server.ip"></span>
-                            </div>
-                            <div x-show="selectedServer.name === server.name" x-transition class="ml-auto">
-                                <i class="fas fa-check-circle text-blue-500"></i>
-                            </div>
-                        </button>
-                    </template>
+    <div class="w-full max-w-md">
+        <div class="bg-white p-8 rounded-2xl shadow-xl border border-blue-100">
+            <div class="text-center mb-8">
+                <div class="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-shield-alt text-white text-2xl"></i>
                 </div>
+                <h1 class="text-2xl font-bold text-slate-800">VPN Generator</h1>
+                <p class="text-slate-500 text-sm">Buat akun VLESS dengan cepat</p>
             </div>
 
-            <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">2. Pilih Domain</label>
-                <div class="relative">
-                    <select x-model="selectedDomain" class="w-full bg-slate-800 border-2 border-slate-800 rounded-2xl p-4 text-slate-200 outline-none focus:border-blue-500 appearance-none transition-all">
-                        <option value="">Pilih Hostname...</option>
-                        <template x-for="domain in domains" :key="domain">
-                            <option :value="domain" x-text="domain"></option>
-                        </template>
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Pilih Server</label>
+                    <select id="serverSelect" class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all cursor-pointer">
+                        <option value="id">Indonesia 🇮🇩</option>
+                        <option value="sg">Singapore 🇸🇬</option>
+                        <option value="manual">Custom</option>
                     </select>
-                    <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
-                        <i class="fas fa-chevron-down text-sm"></i>
-                    </div>
                 </div>
+
+                <div id="manualProxyContainer" class="hidden">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Proxy & Port</label>
+                    <input type="text" id="manualProxy" placeholder="contoh: 127.0.0.1:8080" 
+                        class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+
+                <button onclick="generateVless()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors shadow-lg shadow-blue-200">
+                    Generate Akun
+                </button>
             </div>
 
-            <button @click="generateAccount()" 
-                    :disabled="!selectedServer || !selectedDomain || loading"
-                    class="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all transform active:scale-[0.98] shadow-lg shadow-blue-900/20">
-                <span x-show="!loading">BUAT CONFIG VLESS</span>
-                <span x-show="loading"><i class="fas fa-spinner animate-spin"></i> Generating...</span>
-            </button>
-        </div>
-
-        <div x-show="showResult" x-cloak x-transition class="mt-8 pt-8 border-t border-slate-800">
-            <div class="space-y-4">
-                <div class="bg-slate-950 rounded-2xl p-5 border border-blue-500/20">
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="text-xs font-bold text-blue-500 uppercase tracking-widest">VLESS Config</span>
-                        <span class="text-[10px] bg-green-500/10 text-green-500 px-2 py-1 rounded-full uppercase font-bold">Work 100%</span>
-                    </div>
-                    
-                    <div class="relative group">
-                        <textarea readonly id="vlessConfig" 
-                                  class="w-full h-32 bg-black/40 border border-slate-800 rounded-xl p-3 text-[11px] font-mono text-blue-300 resize-none outline-none focus:border-blue-500/50"
-                                  x-text="vlessLink"></textarea>
-                        
-                        <button @click="copyText" class="absolute bottom-2 right-2 bg-blue-600 hover:bg-blue-500 text-white text-[10px] px-3 py-1.5 rounded-lg shadow-lg transition-all flex items-center gap-1">
-                            <i class="fas" :class="isCopied ? 'fa-check' : 'fa-copy'"></i>
-                            <span x-text="isCopied ? 'Copied!' : 'Copy Config'"></span>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="text-center">
-                    <button @click="resetForm()" class="text-[10px] text-slate-600 hover:text-slate-400 transition-colors uppercase tracking-widest font-bold">
-                        Hapus & Buat Baru
+            <div id="outputArea" class="mt-8 hidden">
+                <label class="block text-sm font-semibold text-slate-700 mb-2">Konfigurasi Anda:</label>
+                <div class="relative">
+                    <textarea id="vlessResult" readonly class="w-full p-4 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-600 h-32 break-all focus:outline-none"></textarea>
+                    <button onclick="copyToClipboard()" class="absolute top-2 right-2 bg-white p-2 rounded-md shadow-sm border border-slate-200 hover:bg-slate-50">
+                        <i id="copyIcon" class="far fa-copy text-blue-600"></i>
                     </button>
                 </div>
             </div>
         </div>
+
+        <div class="text-center mt-6 text-slate-400 text-sm italic">
+            Made with <span class="text-red-500">❤️</span> errucha
+        </div>
     </div>
 
     <script>
-        function vpnApp() {
-            return {
-                selectedServer: '',
-                selectedDomain: '',
-                loading: false,
-                showResult: false,
-                isCopied: false,
-                vlessLink: '',
-                
-                servers: [
-                    { id: 1, name: 'INDONESIA', flag: '🇮🇩', code: 'ID', ip: '103.xxx.xxx.1' },
-                    { id: 2, name: 'SINGAPORE', flag: '🇸🇬', code: 'SG', ip: '139.xxx.xxx.2' },
-                    { id: 3, name: 'MALAYSIA', flag: '🇲🇾', code: 'MY', ip: '128.xxx.xxx.3' }
-                ],
-                
-                domains: [
-                    'xxxx.subdomain.my.id',
-                    'yydnn.subdomain.my.id'
-                ],
+        const serverSelect = document.getElementById('serverSelect');
+        const manualProxyContainer = document.getElementById('manualProxyContainer');
+        const vlessResult = document.getElementById('vlessResult');
+        const outputArea = document.getElementById('outputArea');
 
-                generateUUID() {
-                    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-                        return v.toString(16);
-                    });
-                },
-
-                generateAccount() {
-                    this.loading = true;
-                    this.showResult = false;
-
-                    setTimeout(() => {
-                        const uuid = this.generateUUID();
-                        const randomId = Math.floor(100000 + Math.random() * 900000); // 6 digit acak
-                        const serverCode = this.selectedServer.code;
-                        
-                        // Format Link Sesuai Request
-                        this.vlessLink = `vless://${uuid}@${this.selectedDomain}:443?path=%2Fvpnspeed-${serverCode}&security=tls&encryption=none&insecure=1&host=vless.vpnspeed.my.id&type=ws&allowInsecure=1&sni=vless.vpnspeed.my.id#vpnspeed-${randomId}`;
-                        
-                        this.loading = false;
-                        this.showResult = true;
-                    }, 1000);
-                },
-
-                copyText() {
-                    const el = document.getElementById('vlessConfig');
-                    el.select();
-                    document.execCommand('copy');
-                    
-                    this.isCopied = true;
-                    setTimeout(() => { this.isCopied = false; }, 2000);
-                },
-
-                resetForm() {
-                    this.showResult = false;
-                    this.selectedServer = '';
-                    this.selectedDomain = '';
-                }
+        // Toggle Manual Input
+        serverSelect.addEventListener('change', () => {
+            if (serverSelect.value === 'manual') {
+                manualProxyContainer.classList.remove('hidden');
+            } else {
+                manualProxyContainer.classList.add('hidden');
             }
+        });
+
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        function generateRandomNumber() {
+            return Math.floor(100000 + Math.random() * 900000);
+        }
+
+        function generateVless() {
+            const server = serverSelect.value;
+            const uuid = generateUUID();
+            const randomNum = generateRandomNumber();
+            let path = "";
+
+            if (server === 'id') {
+                path = "/vpnspeed-id";
+            } else if (server === 'sg') {
+                path = "/vpnspeed-sg";
+            } else {
+                const manualVal = document.getElementById('manualProxy').value || "proxy-port";
+                path = "/" + manualVal.replace(/[:]/g, '-');
+            }
+
+            const config = `vless://${uuid}@bug.com:443?path=${path}&security=tls&encryption=none&insecure=1&host=vless.vpnspeed.my.id&type=ws&allowInsecure=1&sni=vless.vpnspeed.my.id#vpnspeed-${randomNum}`;
+            
+            vlessResult.value = config;
+            outputArea.classList.remove('hidden');
+            
+            // Auto scroll to result for better UX
+            setTimeout(() => {
+                outputArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+
+        function copyToClipboard() {
+            vlessResult.select();
+            document.execCommand('copy');
+            
+            const icon = document.getElementById('copyIcon');
+            icon.classList.remove('fa-copy');
+            icon.classList.add('fa-check', 'text-green-500');
+
+            setTimeout(() => {
+                icon.classList.add('fa-copy');
+                icon.classList.remove('fa-check', 'text-green-500');
+            }, 2000);
         }
     </script>
 </body>
