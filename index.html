@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VPN Premium Generator</title>
+    <title>VPN VLESS Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -17,10 +18,10 @@
         
         <div class="text-center mb-8">
             <div class="inline-block p-3 bg-blue-600/10 rounded-2xl mb-4">
-                <i class="fas fa-shield-halved text-4xl text-blue-500"></i>
+                <i class="fas fa-bolt text-4xl text-yellow-400"></i>
             </div>
-            <h1 class="text-2xl font-bold text-white tracking-tight">VPN GENERATOR</h1>
-            <p class="text-slate-400 text-sm mt-1">Cepat • Aman • Gratis</p>
+            <h1 class="text-2xl font-bold text-white tracking-tight">VLESS GENERATOR</h1>
+            <p class="text-slate-400 text-sm mt-1">Gunakan link di bawah untuk aplikasi V2Ray/NekoBox</p>
         </div>
 
         <div class="space-y-6">
@@ -29,12 +30,15 @@
                 <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">1. Pilih Lokasi Server</label>
                 <div class="grid grid-cols-1 gap-2">
                     <template x-for="server in servers" :key="server.id">
-                        <button @click="selectedServer = server.name" 
-                            :class="selectedServer === server.name ? 'border-blue-500 bg-blue-500/10 ring-1 ring-blue-500' : 'border-slate-800 bg-slate-800/50 hover:border-slate-700'"
-                            class="flex items-center p-4 border-2 rounded-2xl transition-all group">
+                        <button @click="selectedServer = server" 
+                            :class="selectedServer.name === server.name ? 'border-blue-500 bg-blue-500/10 ring-1 ring-blue-500' : 'border-slate-800 bg-slate-800/50 hover:border-slate-700'"
+                            class="flex items-center p-4 border-2 rounded-2xl transition-all group text-left">
                             <span class="text-2xl mr-4" x-text="server.flag"></span>
-                            <span class="font-medium text-slate-200 group-hover:text-white" x-text="server.name"></span>
-                            <div x-show="selectedServer === server.name" x-transition class="ml-auto">
+                            <div>
+                                <span class="block font-medium text-slate-200" x-text="server.name"></span>
+                                <span class="text-[10px] text-slate-500" x-text="server.ip"></span>
+                            </div>
+                            <div x-show="selectedServer.name === server.name" x-transition class="ml-auto">
                                 <i class="fas fa-check-circle text-blue-500"></i>
                             </div>
                         </button>
@@ -59,52 +63,39 @@
 
             <button @click="generateAccount()" 
                     :disabled="!selectedServer || !selectedDomain || loading"
-                    class="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all transform active:scale-[0.98] shadow-lg shadow-blue-900/20 flex justify-center items-center">
-                <span x-show="!loading">BUAT AKUN SEKARANG</span>
-                <span x-show="loading" class="flex items-center">
-                    <i class="fas fa-circle-notch animate-spin mr-2"></i> Memproses...
-                </span>
+                    class="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all transform active:scale-[0.98] shadow-lg shadow-blue-900/20">
+                <span x-show="!loading">BUAT CONFIG VLESS</span>
+                <span x-show="loading"><i class="fas fa-spinner animate-spin"></i> Generating...</span>
             </button>
-
         </div>
 
-        <div x-show="showResult" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" class="mt-8 pt-8 border-t border-slate-800">
-            <div class="bg-slate-950 rounded-2xl p-5 border border-blue-500/20 relative group">
-                <div class="flex justify-between items-center mb-4">
-                    <span class="text-xs font-bold text-blue-500 uppercase">Detail Akun</span>
-                    <span class="text-[10px] bg-green-500/10 text-green-500 px-2 py-1 rounded-full uppercase font-bold">Aktif 30 Hari</span>
-                </div>
-                
-                <div id="vpnOutput" class="space-y-2 font-mono text-sm">
-                    <p class="flex justify-between border-b border-slate-800 pb-2">
-                        <span class="text-slate-500 text-xs">SERVER</span>
-                        <span class="text-white" x-text="selectedServer"></span>
-                    </p>
-                    <p class="flex justify-between border-b border-slate-800 pb-2">
-                        <span class="text-slate-500 text-xs">HOST</span>
-                        <span class="text-white text-right" x-text="selectedServer.toLowerCase() + '.' + selectedDomain"></span>
-                    </p>
-                    <p class="flex justify-between border-b border-slate-800 pb-2">
-                        <span class="text-slate-500 text-xs">USERNAME</span>
-                        <span class="text-white">user-premium-88</span>
-                    </p>
-                    <p class="flex justify-between">
-                        <span class="text-slate-500 text-xs">PASSWORD</span>
-                        <span class="text-white">vpn123</span>
-                    </p>
+        <div x-show="showResult" x-cloak x-transition class="mt-8 pt-8 border-t border-slate-800">
+            <div class="space-y-4">
+                <div class="bg-slate-950 rounded-2xl p-5 border border-blue-500/20">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-xs font-bold text-blue-500 uppercase tracking-widest">VLESS Config</span>
+                        <span class="text-[10px] bg-green-500/10 text-green-500 px-2 py-1 rounded-full uppercase font-bold">Work 100%</span>
+                    </div>
+                    
+                    <div class="relative group">
+                        <textarea readonly id="vlessConfig" 
+                                  class="w-full h-32 bg-black/40 border border-slate-800 rounded-xl p-3 text-[11px] font-mono text-blue-300 resize-none outline-none focus:border-blue-500/50"
+                                  x-text="vlessLink"></textarea>
+                        
+                        <button @click="copyText" class="absolute bottom-2 right-2 bg-blue-600 hover:bg-blue-500 text-white text-[10px] px-3 py-1.5 rounded-lg shadow-lg transition-all flex items-center gap-1">
+                            <i class="fas" :class="isCopied ? 'fa-check' : 'fa-copy'"></i>
+                            <span x-text="isCopied ? 'Copied!' : 'Copy Config'"></span>
+                        </button>
+                    </div>
                 </div>
 
-                <button @click="copyText" class="mt-6 w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2">
-                    <i class="fas fa-copy"></i>
-                    <span x-text="copyLabel">SALIN DETAIL AKUN</span>
-                </button>
+                <div class="text-center">
+                    <button @click="resetForm()" class="text-[10px] text-slate-600 hover:text-slate-400 transition-colors uppercase tracking-widest font-bold">
+                        Hapus & Buat Baru
+                    </button>
+                </div>
             </div>
-            
-            <button @click="resetForm()" class="w-full mt-4 text-xs text-slate-600 hover:text-slate-400 transition-colors uppercase tracking-widest font-bold">
-                Kembali
-            </button>
         </div>
-
     </div>
 
     <script>
@@ -114,12 +105,13 @@
                 selectedDomain: '',
                 loading: false,
                 showResult: false,
-                copyLabel: 'SALIN DETAIL AKUN',
+                isCopied: false,
+                vlessLink: '',
                 
                 servers: [
-                    { id: 1, name: 'INDONESIA', flag: '🇮🇩' },
-                    { id: 2, name: 'SINGAPORE', flag: '🇸🇬' },
-                    { id: 3, name: 'MALAYSIA', flag: '🇲🇾' }
+                    { id: 1, name: 'INDONESIA', flag: '🇮🇩', code: 'ID', ip: '103.xxx.xxx.1' },
+                    { id: 2, name: 'SINGAPORE', flag: '🇸🇬', code: 'SG', ip: '139.xxx.xxx.2' },
+                    { id: 3, name: 'MALAYSIA', flag: '🇲🇾', code: 'MY', ip: '128.xxx.xxx.3' }
                 ],
                 
                 domains: [
@@ -127,23 +119,37 @@
                     'yydnn.subdomain.my.id'
                 ],
 
+                generateUUID() {
+                    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                        return v.toString(16);
+                    });
+                },
+
                 generateAccount() {
                     this.loading = true;
-                    // Simulasi delay proses 1.5 detik
+                    this.showResult = false;
+
                     setTimeout(() => {
+                        const uuid = this.generateUUID();
+                        const randomId = Math.floor(100000 + Math.random() * 900000); // 6 digit acak
+                        const serverCode = this.selectedServer.code;
+                        
+                        // Format Link Sesuai Request
+                        this.vlessLink = `vless://${uuid}@${this.selectedDomain}:443?path=%2Fvpnspeed-${serverCode}&security=tls&encryption=none&insecure=1&host=vless.vpnspeed.my.id&type=ws&allowInsecure=1&sni=vless.vpnspeed.my.id#vpnspeed-${randomId}`;
+                        
                         this.loading = false;
                         this.showResult = true;
-                    }, 1500);
+                    }, 1000);
                 },
 
                 copyText() {
-                    const textContent = document.getElementById('vpnOutput').innerText;
-                    navigator.clipboard.writeText(textContent).then(() => {
-                        this.copyLabel = 'BERHASIL DISALIN!';
-                        setTimeout(() => {
-                            this.copyLabel = 'SALIN DETAIL AKUN';
-                        }, 2000);
-                    });
+                    const el = document.getElementById('vlessConfig');
+                    el.select();
+                    document.execCommand('copy');
+                    
+                    this.isCopied = true;
+                    setTimeout(() => { this.isCopied = false; }, 2000);
                 },
 
                 resetForm() {
